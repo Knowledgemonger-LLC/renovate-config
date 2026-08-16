@@ -2,21 +2,24 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
     "Knowledgemonger-LLC org-wide base Renovate preset. Consumed by every repo via a thin renovate.json that does: extends: [\"github>Knowledgemonger-LLC/renovate-config\"]. A bare github> reference with no path resolves to THIS file (default.json at the repo root), so it must stay named default.json and live at the root.",
-    "This file is the org default. Per-repo overrides (extra packageRules, a different schedule, additional presets) belong in each consumer's own renovate.json ALONGSIDE the extends — not here."
+    "This file is the org default. Per-repo overrides (extra packageRules, a different schedule, additional presets) belong in each consumer's own renovate.json ALONGSIDE the extends — not here.",
+    "timezone is set here rather than per-repo because schedule strings are meaningless without it: Renovate defaults to UTC, so 'before 9am on monday' would fire at 4am or 5am Eastern depending on daylight saving. A schedule and the timezone it is written against have to travel together."
   ],
   "extends": [
     "config:recommended",
     ":dependencyDashboard",
     ":semanticCommits"
   ],
+  "timezone": "America/New_York",
   "schedule": ["before 9am on monday"],
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "description": "Automerge devDependencies for minor/patch updates — low risk, keeps toolchain current without manual review.",
+      "description": "Automerge devDependencies for minor/patch updates — low risk, keeps toolchain current without manual review. minimumReleaseAge is load-bearing rather than cosmetic: automerge means no human reads these before they land, and Renovate only waits on status checks that actually exist — most repos in this org have no CI at all, so a bad release would merge unopposed. Waiting 7 days means a compromised or broken release is usually yanked or publicly disclosed before it can reach a default branch.",
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
+      "automerge": true,
+      "minimumReleaseAge": "7 days"
     }
   ]
 }

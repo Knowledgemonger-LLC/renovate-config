@@ -11,9 +11,23 @@ every repo, so update policy is defined once and inherited everywhere.
 - extends `config:recommended` (Renovate's sane defaults),
 - enables the **dependency dashboard** (`:dependencyDashboard`) and **semantic commits**
   (`:semanticCommits`),
-- runs on a **weekly** schedule (`before 9am on monday`),
+- runs on a **weekly** schedule (`before 9am on monday`, `America/New_York`),
 - labels update PRs `dependencies`,
-- **automerges devDependencies** minor/patch updates.
+- **automerges devDependencies** minor/patch updates, after a **7-day cooldown**.
+
+## Why devDependencies automerge has a cooldown
+
+Automerge means no human reads the change before it reaches a default branch. Renovate waits
+on status checks, but only ones that **exist** — most repos in this org have no CI at all, so
+on those there is nothing between a published release and `main`.
+
+`minimumReleaseAge: "7 days"` is what stands in for that missing review. Package compromises
+are typically caught and yanked within days of publication, so the delay means the incident is
+public before the merge happens. The cost is that legitimate devDependency patches land a week
+late, which for tooling is not a cost worth paying attention to.
+
+Do not remove it without giving the repos that inherit it something else — a required status
+check, or `automerge: false`.
 
 ## How repos consume it
 
